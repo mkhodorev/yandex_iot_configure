@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'yandex_iot_configure'
+
+if ARGV.length != 1
+  puts 'Use: yandex_iot_configure [filename.yaml]'
+  exit
+end
+
+filename = ARGV[0]
+YandexIotConfigure.apply_config(filename)
