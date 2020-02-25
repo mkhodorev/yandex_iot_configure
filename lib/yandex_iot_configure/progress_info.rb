@@ -18,7 +18,7 @@ module YandexIotConfigure
     end
 
     def success
-      puts "\n #{@name}: Success"
+      puts "\n#{@name}: Success"
     end
 
     private

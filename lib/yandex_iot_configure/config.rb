@@ -33,28 +33,68 @@ module YandexIotConfigure
       @scenarios ||= Scenarios.new(@cookie, @x_csrf_token)
     end
 
-    def apply_schema(data)
-      return if data.nil?
-      group_names = []
+    def delete_groups
+      groups.delete_all while groups.all.count > 0
+    end
+
+    def delete_scenarios
+      scenarios.delete_all while scenarios.all.count > 0
+    end
+
+    def delete_devices
+      devices.delete_all while devices.all.count > 0
+    end
+
+    def print_group_names(data)
+      if data.nil?
+        puts 'Groups not found'
+        return
+      end
+      gn = group_names(data)
+      puts "Find #{gn.count} groups:"
+      gn.sort.each { |g| puts "  - #{g}" }
+      puts "Yandex allow max 1000 groups. Config contains: #{gn.count}" if gn.count > 1000
+    end
+
+    def print_scenario_names(data)
+      if data.nil?
+        puts 'Scenarios not found'
+        return
+      end
+      expand_scenario_names(data)
+      sn = scenario_names(data)
+      puts "Find #{sn.count} scenarios:"
+      sn.sort.each { |s| puts "  - #{s}" }
+      puts "Yandex allow max 1000 scenarios. Config contains: #{sn.count}" if sn.count > 1000
+    end
+
+    def group_names(data)
+      result = []
       data.each do |name, group|
         g = Phrase.compile(group)
         data[name] = g
-        group_names += g
+        result += g
       end
-      group_names.uniq!
+      result.uniq!
+      result
+    end
 
-      if group_names.count > 1000
-        puts "Yandex allow max 1000 groups. Config contains #{group_names.count}"
+    def apply_groups(data)
+      return if data.nil?
+
+      gn = group_names(data)
+      if gn.count > 1000
+        puts "Yandex allow max 1000 groups. Config contains #{gn.count}"
         return
       else
-        puts "Find #{scenario_names_count} groups"
+        puts "Find #{gn.count} groups"
       end
-      validate_device_names(data.keys, 'schema')
 
-      groups.delete_all
-      groups.create_groups_if_need(group_names)
+      validate_device_names(data.keys, 'groups schema')
+      delete_groups
+      groups.create_groups_if_need(gn)
 
-      process = ProgressInfo.new(name: 'Apply schema', count: data.count)
+      process = ProgressInfo.new(name: 'Apply groups to devices', count: data.count)
       data.each do |name, group_data|
         ids = groups.names_to_ids(group_data)
         devices.add_device_to_groups(name, ids)
@@ -62,7 +102,7 @@ module YandexIotConfigure
       end
       process.success
     rescue
-      puts "\nApply schema error"
+      puts "\nApply groups schema error"
     end
 
     def apply_scenarios(data)
@@ -78,7 +118,7 @@ module YandexIotConfigure
       end
 
       validate_scenarios(data)
-      scenarios.delete_all
+      delete_scenarios
       process = ProgressInfo.new(name: 'Apply scenarios', count: scenario_names_count)
 
       data.each do |scenario|
@@ -141,7 +181,7 @@ module YandexIotConfigure
 
     def validate_scenarios(data)
       validate_device_names(device_names(data), 'scenarios')
-      check_uniq_array(scenario_names(data), 'schema')
+      check_uniq_array(scenario_names(data), 'scenarios')
     end
 
     def check_uniq_array(data, item_name)

@@ -1,12 +1,67 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
+require 'optparse'
 require 'yandex_iot_configure'
 
-if ARGV.length != 1
-  puts 'Use: yandex_iot_configure [filename.yaml]'
-  exit
+# if ARGV.length != 1
+#   puts 'Use: yandex_iot_configure [filename.yaml]'
+#   exit
+# end
+
+# filename = ARGV[0]
+# YandexIotConfigure.apply_config(filename)
+
+__options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: yandex_iot_configure [options] [filename]"
+
+  opts.on('--delete-devices', 'Delete all devices') do |v|
+    __options[:delete_devices] = v
+  end
+  opts.on('--print-groups', 'Print groups') do |v|
+    __options[:print_groups] = v
+  end
+  opts.on('--print-scenarios', 'Print scenarios') do |v|
+    __options[:print_scenarios] = v
+  end
+  opts.on('--delete-groups', 'Delete all groups') do |v|
+    __options[:delete_groups] = v
+  end
+  opts.on('--delete-scenarios', 'Delete all scenarios') do |v|
+    __options[:delete_scenarios] = v
+  end
+  opts.on('-g', '--groups', "Load groups") do |v|
+    __options[:groups] = v
+  end
+  opts.on('-s', '--scenarios', "Load scenarios") do |v|
+    __options[:scenarios] = v
+  end
+  opts.on('-f FILENAME', '--filename FILENAME', "Path to conig [filename.yaml]") do |v|
+    __options[:filename] = v
+  end
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+    exit
+  end
+end.parse!
+
+p __options
+
+if !__options.key?(:filename)
+  puts 'Config not load'
+  exit(0)
+else
+  YandexIotConfigure.load_file(__options[:filename])
 end
 
-filename = ARGV[0]
-YandexIotConfigure.apply_config(filename)
+__options.delete(:delete_groups) if __options.key?(:groups) && __options.key?(:delete_groups)
+__options.delete(:delete_scenarios) if __options.key?(:scenarios) && __options.key?(:delete_scenarios)
+
+YandexIotConfigure.delete_devices if __options.key?(:delete_devices)
+YandexIotConfigure.delete_groups if __options.key?(:delete_groups)
+YandexIotConfigure.delete_scenarios if __options.key?(:delete_scenarios)
+YandexIotConfigure.apply_groups if __options.key?(:groups)
+YandexIotConfigure.apply_scenarios if __options.key?(:scenarios)
+YandexIotConfigure.print_groups if __options.key?(:print_groups)
+YandexIotConfigure.print_scenarios if __options.key?(:print_scenarios)

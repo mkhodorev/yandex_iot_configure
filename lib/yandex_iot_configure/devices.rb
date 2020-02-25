@@ -23,6 +23,19 @@ module YandexIotConfigure
       all[name]
     end
 
+    def delete_all
+      update
+      process = ProgressInfo.new(name: 'Delete devices', count: all.count)
+
+      all.each do |_, device|
+        delete_by_id(device['id'])
+        process.update
+      end
+
+      update
+      process.success
+    end
+
     def add_device_to_groups(device_name, groups)
       id = device(device_name)['id']
 
@@ -45,6 +58,14 @@ module YandexIotConfigure
     end
 
     private
+
+    def delete_by_id(id)
+      response = Faraday.delete("#{DEVICES_URI}/#{id}") do |req|
+        req.headers['Cookie'] = @cookie
+        req.headers['x-csrf-token'] = @x_csrf_token
+      end
+      puts "Delete device #{id} error: #{response.body}" if response.status != 200
+    end
 
     def read_rooms
       response = Faraday.get(DEVICES_URI) do |req|

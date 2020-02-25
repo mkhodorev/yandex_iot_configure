@@ -31,6 +31,7 @@ module YandexIotConfigure
         process.update
       end
 
+      update
       process.success
     end
 
