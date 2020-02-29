@@ -24,14 +24,14 @@ $ gem specific_install https://github.com/mkhodorev/yandex_iot_configure.git
 вариант без установки
 ```bash
 $ cd yandex_iot_configure
-$ bundle exec ./exe/yandex_iot_configure --print-scenarios -f ya_iot_config.yml
-$ bundle exec ./exe/yandex_iot_configure -g -f ya_iot_config.yml
+$ bundle exec ./exe/yandex_iot_configure --print-scenarios -f ya_iot_config.yaml
+$ bundle exec ./exe/yandex_iot_configure -g -f ya_iot_config.yaml
 ```
 
 вариант с установкой gem
 ```bash
-yandex_iot_configure --print-scenarios -f ya_iot_config.yml
-yandex_iot_configure -g -f ya_iot_config.yml
+yandex_iot_configure --print-scenarios -f ya_iot_config.yaml
+yandex_iot_configure -g -f ya_iot_config.yaml
 ```
 ### Параметры:
 
