@@ -30,8 +30,8 @@ $ bundle exec ./exe/yandex_iot_configure -g -f ya_iot_config.yaml
 
 вариант с установкой gem
 ```bash
-yandex_iot_configure --print-scenarios -f ya_iot_config.yaml
-yandex_iot_configure -g -f ya_iot_config.yaml
+$ yandex_iot_configure --print-scenarios -f ya_iot_config.yaml
+$ yandex_iot_configure -g -f ya_iot_config.yaml
 ```
 ### Параметры:
 
