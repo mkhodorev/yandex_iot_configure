@@ -6,8 +6,7 @@ module YandexIotConfigure
 
     def phrases_parse(data)
       compile_all_phrases(data)
-      mixed_all_phrases(data)
-      combine_all_phrases(data)
+      mixed_and_combined_all_phrases(data)
 
       data.flatten!
       data.delete_if { |d| !d.is_a?(String) }
@@ -28,32 +27,18 @@ module YandexIotConfigure
       data
     end
 
-    def mixed_all_phrases(data)
+    def mixed_and_combined_all_phrases(data)
       data.each_with_index do |item, i|
         if item.is_a?(Array)
-          mixed_all_phrases(item)
+          mixed_and_combined_all_phrases(item)
         elsif item.is_a?(Hash)
           item.each do |key, value|
-            value = mixed_all_phrases(value)
+            value = mixed_and_combined_all_phrases(value)
           end
 
-          data[i] = mix_phrases(item['mix']) if item.keys == ['mix']
-        end
-      end
-      data.uniq!
-      data
-    end
-
-    def combine_all_phrases(data)
-      data.each_with_index do |item, i|
-        if item.is_a?(Array)
-          combine_all_phrases(item)
-        elsif item.is_a?(Hash)
-          item.each do |key, value|
-            value = combine_all_phrases(value)
-          end
-
-          if item.keys == ['combine']
+          if item.keys == ['mix']
+            data[i] = mix_phrases(item['mix'])
+          elsif item.keys == ['combine']
             data[i] = combine_array(item['combine']).map { |x| x.join(' ') }
           end
         end

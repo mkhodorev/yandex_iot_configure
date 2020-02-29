@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["mkhodorev@google.com"]
 
   spec.summary       = 'Yandex Smart Home Configure'
-  spec.description   = 'Yandex Smart Home Configure'
+  spec.description   = 'Create and configure Groups and Scripts in Yandex Smart Home'
   # spec.homepage      = 'yandex_iot_configure'
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'

@@ -1,38 +1,197 @@
 # YandexIotConfigure
 
-Скрипт для конфигурирования Групп и Сценариев в Yandex Умный Дом
+Скрипт для создания и конфигурирования Групп и Сценариев в Yandex Умный Дом
 
 https://yandex.ru/quasar/iot
 
-## Installation
+https://dialogs.yandex.ru/developer
 
-Add this line to your application's Gemfile:
+Для работы должен быть настроен Yandex Умный Дом
 
-```ruby
-gem 'yandex_iot_configure'
+## Установка
+```bash
+$ cd yandex_iot_configure
+$ bundle install
 ```
 
-And then execute:
+Установка в качестве `gem`
+```bash
+$ gem install specific_install
+$ gem specific_install https://github.com/mkhodorev/yandex_iot_configure.git
+```
 
-    $ bundle
+## Использование
+вариант без установки
+```bash
+$ cd yandex_iot_configure
+$ bundle exec ./exe/yandex_iot_configure --print-scenarios -f ya_iot_config.yml
+$ bundle exec ./exe/yandex_iot_configure -g -f ya_iot_config.yml
+```
 
-Or install it yourself as:
+вариант с установкой gem
+```bash
+yandex_iot_configure --print-scenarios -f ya_iot_config.yml
+yandex_iot_configure -g -f ya_iot_config.yml
+```
+### Параметры:
 
-    $ gem install yandex_iot_configure
+- `--print-groups` - Распечатать все группы из конфига
+- `--print-scenarios` - Распечатать все сценарии из конфига
+- `--delete-devices` - Удалить все устройства в умном доме
+- `--delete-groups` - Удалить все группы в умном доме
+- `--delete-scenarios` - Удалить все сценарии в умном доме
+- `-g`, `--groups` - Загрузить группы в умный дом (с удалением)
+- `-s`, `--scenarios` - Загрузить сценарии в умный дом (с удалением)
+- `-f`, `--filename` FILENAME - путь к файлу конфигурации формата YAML
+- `-h`, `--help` - помощь
 
-## Usage
+### Файл конфигурации
+Файл конфигурации должен содержать разделы:
+ - `cookie`: свежая кука с сайта Yandex Умный Дом
+ - `x_csrf_token`: свежый CSRF token с сайта Yandex Умный Дом
+ - `groups`: группы в которые нужно включить устройство
+ - `scenarios`: список сценариев
 
+#### Раздел групп
+Состоит из названий устройств, которые должны существовать и групп, в которые нужно включить это устройство умного дома. Если группы не существует, то она будет создана.
 
+Перед добавлением групп все ранее созданные группы удаляются
 
-## Development
+```yaml
+groups:
+  название_устройства1_в_Yandex_Умный_Дом:
+    - группа 1
+    - группа 2
+    - группа 3
+    ...
+  
+  название_устройства2_в_Yandex_Умный_Дом:
+    - группа 1
+    - группа 4
+    - группа 5
+    ...
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+  название_устройства3_в_Yandex_Умный_Дом: группа 2
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+#### Раздел сценариев
 
-## Contributing
+Состоит из списка названий сценариев и списка действий. Названия сценариев должны быть уникальными. Для каждого названия будет создан свой сценарий
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/yandex_iot_configure.
+Список действий состоит из названий устройств и их состяний (`true` или `false`). Допускаются только устройства `on_off`. Например включить лампу: `лампа: true`
 
+Так же можно попросить Алису выполнить фразу: `Алиса: Алиса, повтори за мной "Что именно включить?"`
 
+Перед добавлением сценариев все ранее созданные сценарии удаляются
 
+```yaml
+scenarios:
+  - name:
+      - включи свет
+      - включи лампу
+    actions:
+      Алиса: Алиса, повтори за мной "Включаю свет"
+      название_устройства_свет_в_Yandex_Умный_Дом: true
+
+  - name: выключи свет
+    actions:
+      Алиса: Алиса, повтори за мной "Выключаю свет"
+      название_устройства_свет_в_Yandex_Умный_Дом: false
+```
+
+#### Генерация названий сценариев и групп
+
+`mix` - пермешивание. Принимает список элементов, которые нужно перемешать. Например:
+```yaml
+mix: [a, b]    # => [a b, b a]
+mix: [a, b, c] # => [a b c, a c b, b a c, b c a, c a b, c b a]
+mix:
+  - [a, b]
+  - c          # => [a c, b c, c a, c b]
+```
+
+`combine` - комбинирование. Принимает список элементов, которые нужно скомбинировать между собой в порядке их добавления. Например:
+```yaml
+combine:
+  - [a, b]
+  - c 
+  - [d, e]  # => [a c d, a c e, b c d, b c e]
+```
+
+`compile` - создание фразы. Принимает свойства: `phrase`, `prfix`, `postfix`. Например:
+```yaml
+compile:
+  phrase: x
+  prefix: [a, b]
+  postfix: c     # => [a x, a x c, b x, b x c, x, x c]
+```
+
+Допускается вложенная генерация названий. Например:
+```yaml
+combine:
+  - [a, b]
+  - compile:
+      phrase: x
+      prefix: [y, z]
+  - mix:
+    - c
+    - combine: [d, e]
+# result:
+#   - a x c d e
+#   - a x d e c
+#   - a y x c d e
+#   - a y x d e c
+#   - a z x c d e
+#   - a z x d e c
+#   - b x c d e
+#   - b x d e c
+#   - b y x c d e
+#   - b y x d e c
+#   - b z x c d e
+#   - b z x d e c
+```
+
+#### Пример файла конфигурации
+```yaml
+config:
+  cookie: ...
+  x_csrf_token: ...
+
+  groups:
+    свет 1:
+      - mix: [весь свет, на кухне]
+      - mix:
+        - [свет, люстра]
+        - на кухне
+      - mix:
+        - подсветка
+        - на кухне
+
+    свет 2:
+      - mix:
+        - подсветка
+        - на кухне
+
+  scenarios:
+    - name:
+        - compile:
+            phrase: включи
+            postfix: свет
+      actions:
+        Алиса: Алиса, повтори за мной "Что именно включить?"
+    
+    - name:
+        - compile:
+            phrase: выключи
+            postfix: свет
+      actions:
+        Алиса: Алиса, повтори за мной "Что именно выключить?"
+
+    - name:
+        - combine:
+          - [убери, уберись]
+          - в спальне
+      actions:
+        Пылесос спальня: true
+        Алиса: Алиса, повтори за мной "Начинаю уборку в спальне"
+```

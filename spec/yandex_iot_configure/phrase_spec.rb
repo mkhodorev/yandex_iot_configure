@@ -128,11 +128,11 @@ describe YandexIotConfigure::Phrase do
     end
   end
 
-  describe '#mixed_all_phrases' do
+  describe '#mixed_and_combined_all_phrases' do
     it 'should mix and return phrases from array' do
       data = [{ 'mix' => ['a', 'b', 'c'] }]
       result = [['a b c', 'b a c', 'c a b', 'a c b', 'b c a', 'c b a']]
-      expect(phrase.mixed_all_phrases(data)).to eql(result)
+      expect(phrase.mixed_and_combined_all_phrases(data)).to eql(result)
     end
 
     it 'should mix and return phrases from array with nested arrays' do
@@ -141,7 +141,7 @@ describe YandexIotConfigure::Phrase do
         'a 1 b', '1 a b', 'b a 1', 'a b 1', '1 b a', 'b 1 a',
         'a 2 b', '2 a b', 'b a 2', 'a b 2', '2 b a', 'b 2 a'
       ]]
-      expect(phrase.mixed_all_phrases(data)).to eql(result)
+      expect(phrase.mixed_and_combined_all_phrases(data)).to eql(result)
     end
 
     it 'should process item with strings and mixed arrays' do
@@ -152,7 +152,19 @@ describe YandexIotConfigure::Phrase do
          'a 2 b', '2 a b', 'b a 2', 'a b 2', '2 b a', 'b 2 a'],
         'y'
       ]
-      expect(phrase.mixed_all_phrases(data)).to eql(result)
+      expect(phrase.mixed_and_combined_all_phrases(data)).to eql(result)
+    end
+
+    it 'should mix and return phrases from array with combined array' do
+      data = [{ 'mix' => ['a', { 'combine' => ['b', 'c'] }] }]
+      result = [['a b c', 'b c a']]
+      expect(phrase.mixed_and_combined_all_phrases(data)).to eql(result)
+    end
+
+    it 'should combine and return phrases from array with mixed array' do
+      data = [{ 'combine' => ['a', { 'mix' => ['b', 'c'] }] }]
+      result = [['a b c', 'a c b']]
+      expect(phrase.mixed_and_combined_all_phrases(data)).to eql(result)
     end
   end
 

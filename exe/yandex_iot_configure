@@ -46,8 +46,6 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-p __options
-
 if !__options.key?(:filename)
   puts 'Config not load'
   exit(0)
@@ -58,10 +56,10 @@ end
 __options.delete(:delete_groups) if __options.key?(:groups) && __options.key?(:delete_groups)
 __options.delete(:delete_scenarios) if __options.key?(:scenarios) && __options.key?(:delete_scenarios)
 
-YandexIotConfigure.delete_devices if __options.key?(:delete_devices)
 YandexIotConfigure.delete_groups if __options.key?(:delete_groups)
 YandexIotConfigure.delete_scenarios if __options.key?(:delete_scenarios)
-YandexIotConfigure.apply_groups if __options.key?(:groups)
-YandexIotConfigure.apply_scenarios if __options.key?(:scenarios)
+YandexIotConfigure.delete_devices if __options.key?(:delete_devices)
 YandexIotConfigure.print_groups if __options.key?(:print_groups)
+YandexIotConfigure.apply_groups if __options.key?(:groups)
 YandexIotConfigure.print_scenarios if __options.key?(:print_scenarios)
+YandexIotConfigure.apply_scenarios if __options.key?(:scenarios)
